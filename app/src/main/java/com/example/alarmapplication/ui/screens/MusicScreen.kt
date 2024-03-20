@@ -1,4 +1,4 @@
-package com.example.alarmapplication.screens
+package com.example.alarmapplication.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
