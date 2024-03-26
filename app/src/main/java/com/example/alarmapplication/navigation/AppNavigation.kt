@@ -76,6 +76,5 @@ fun AppNavigation() {
                 ArticlesScreen()
             }
         }
-
     }
 }
