@@ -1,5 +1,6 @@
 package com.example.alarmapplication.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePickerColors
 import androidx.compose.material3.TimePickerDefaults
@@ -26,67 +28,82 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.alarmapplication.R
 
 
 @Composable
 fun MusicScreen() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()
     ) {
         Text(
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            text = "Выберете мелодию"
+            fontWeight = FontWeight.Bold, fontSize = 28.sp, text = "Выберете мелодию"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(0.8f),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
                 onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(120.dp, 80.dp),
+                modifier = Modifier.size(120.dp, 80.dp),
                 shape = RoundedCornerShape(8.dp),
             ) {
-
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.music_fire),
+                    contentDescription = "MusicIcon"
+                )
             }
             Button(
                 onClick = { /*TODO*/ },
                 modifier = Modifier.size(120.dp, 80.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.music_forest),
+                    contentDescription = "ForestIcon"
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(0.8f),
-            horizontalArrangement = Arrangement.SpaceEvenly) {
+            modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             Button(
                 onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(120.dp, 80.dp),
+                modifier = Modifier.size(120.dp, 80.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.music_water),
+                    contentDescription = "WaterIcon"
+                )
             }
             Button(
                 onClick = { /*TODO*/ },
                 modifier = Modifier.size(120.dp, 80.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.music_storm),
+                    contentDescription = "StormIcon"
+                )
             }
         }
 
     }
 }
+
+// TODO: Добавить активацию музыки при нажатии (отключение при повтороном нажатии, музыка на репите. Сверстать калькулятор времени (timePicker мб). Реализовать функционал подсчета
