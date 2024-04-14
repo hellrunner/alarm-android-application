@@ -87,26 +87,6 @@ fun MusicScreen() {
 
             }
         }
-        TimePickerView()
 
     }
-}
-
-@Composable
-@ExperimentalMaterial3Api
-fun TimePicker(
-    state: TimePickerState,
-    modifier: Modifier = Modifier,
-    colors: TimePickerColors = TimePickerDefaults.colors(),
-    layoutType: TimePickerLayoutType = TimePickerDefaults.layoutType(),
-) {
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun TimePickerView(){
-    val timeState = rememberTimePickerState(11, 30, false)
-    TimePicker(timeState)
 }
