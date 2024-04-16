@@ -44,7 +44,7 @@ fun ArticlesScreen() {
 //        ресурсы в res/drawable
     )
 
-    LazyColumn {
+    LazyColumn() {
         items(articles) { article ->
             ArticleItem(article)
         }
