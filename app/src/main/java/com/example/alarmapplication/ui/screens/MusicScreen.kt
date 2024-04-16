@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -65,6 +66,18 @@ fun MusicScreen() {
 
     var sleepTimes by remember { mutableStateOf(listOf<LocalTime>()) }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayers.values.forEach { mediaPlayer ->
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.stop()
+                }
+                mediaPlayer.release()
+            }
+            mediaPlayers.clear()
+        }
+
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -160,16 +173,23 @@ fun MusicButton(
 ) {
     Button(
         onClick = {
-            mediaPlayers.getOrPut(trackId) { MediaPlayer.create(context, trackId) }.apply {
-                if (isPlaying[trackId] == true) {
-                    pause()
-                    isPlaying[trackId] = false
-                } else {
-                    start()
-                    isPlaying[trackId] = true
-                    isLooping = true
+            val currentPlayer = mediaPlayers.getOrPut(trackId) {
+                MediaPlayer.create(context, trackId).apply { isLooping = true }
+            }
+            val currentIsPlaying = isPlaying[trackId] == true
+            // Stop all other tracks before starting this one
+            mediaPlayers.forEach { (id, player) ->
+                if (id != trackId && isPlaying[id] == true) {
+                    player.pause()
+                    isPlaying[id] = false
                 }
             }
+            if (currentIsPlaying) {
+                currentPlayer.pause()
+            } else {
+                currentPlayer.start()
+            }
+            isPlaying[trackId] = !currentIsPlaying
         },
         modifier = Modifier.size(120.dp, 80.dp),
         shape = RoundedCornerShape(8.dp)
@@ -188,6 +208,7 @@ fun MusicButton(
         )
     }
 }
+
 
 
 @RequiresApi(Build.VERSION_CODES.O)
