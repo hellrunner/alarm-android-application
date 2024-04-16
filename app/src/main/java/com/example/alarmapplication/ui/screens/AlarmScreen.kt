@@ -1,5 +1,6 @@
 package com.example.alarmapplication.ui.screens
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -23,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,11 +39,13 @@ import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.ui.components.AlarmItem
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -53,61 +57,16 @@ fun AlarmScreen() {
     val snackState = remember { SnackbarHostState() }
     val snackScope = rememberCoroutineScope()
     val context = LocalContext.current
-    var cal: Calendar = Calendar.getInstance()
-    val simpleDateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val alarms = listOf(
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
-        Alarm(
-            "5:50",
-            "Вт",
-            true
-        ),
+    var cal: Calendar
+    val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-        )
+    val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
+    val noteList by remember { alarms }.collectAsState()
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
     ) {
-        items(alarms) { alarm ->
+        items(alarms.value) { alarm ->
             AlarmItem(alarm = alarm)
         }
     }
@@ -142,14 +101,23 @@ fun AlarmScreen() {
                 if (canScheduleExactAlarms(context)) {
                     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                     val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(cal.timeInMillis, getAlarmPendingIntent(context))
-
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
-                    Toast.makeText(context,
-                        "Будильник установлен на " + simpleDateFormat.format(cal.time), Toast.LENGTH_SHORT).show()
+
+                    makeToast(context, simpleDateFormat.format(cal.time))
+
+                    val newList = ArrayList(noteList)
+                    newList.add(
+                        Alarm(
+                            simpleDateFormat.format(cal.time),
+                            "Th",
+                            true)
+                    )
+                    alarms.value = newList
                 }
 
                 showTimePicker = false
-            }) {
+            })
+        {
             TimePicker(state = state)
         }
 
@@ -163,7 +131,6 @@ private fun getAlarmPendingIntent(context: Context): PendingIntent {
     val intent = Intent(context, MainActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_IMMUTABLE and
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 }
 
@@ -171,7 +138,6 @@ private fun getAlarmActionPending(context: Context): PendingIntent {
     val intent = Intent(context, AlarmActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_IMMUTABLE and
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
 }
 
@@ -179,4 +145,30 @@ private fun getAlarmActionPending(context: Context): PendingIntent {
 fun canScheduleExactAlarms(context: Context): Boolean {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
     return alarmManager?.canScheduleExactAlarms() ?: false
+}
+
+/*@Composable Если будет не впадлу, то можо сделать отдельный метод добавления элемента
+fun AddItem(
+    alarms: MutableStateFlow<List<Alarm>> =
+        remember { MutableStateFlow(listOf()) },
+    noteList: List<Alarm>,
+    time: String)
+{
+
+    val newList = ArrayList(noteList)
+    newList.add(
+        Alarm(
+            time,
+            "Th",
+            true)
+    )
+    alarms.value = newList
+}*/
+
+fun makeToast(context: Context, time: String){
+    Toast.makeText(
+        context,
+        "Будильник установлен на $time",
+        Toast.LENGTH_SHORT
+    ).show()
 }
