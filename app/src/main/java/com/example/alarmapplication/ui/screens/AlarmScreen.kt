@@ -54,7 +54,7 @@ fun AlarmScreen() {
     val snackScope = rememberCoroutineScope()
     val context = LocalContext.current
     var cal: Calendar = Calendar.getInstance()
-    var simpleDateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val simpleDateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val alarms = listOf(
         Alarm(
             "5:50",
@@ -144,7 +144,8 @@ fun AlarmScreen() {
                     val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(cal.timeInMillis, getAlarmPendingIntent(context))
 
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
-                    Toast.makeText(context, "Будильник установлен на" + simpleDateFormat.format(cal.time), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        "Будильник установлен на " + simpleDateFormat.format(cal.time), Toast.LENGTH_SHORT).show()
                 }
 
                 showTimePicker = false
@@ -159,17 +160,19 @@ fun AlarmScreen() {
 }
 
 private fun getAlarmPendingIntent(context: Context): PendingIntent {
-    val intent: Intent = Intent(context, MainActivity::class.java)
+    val intent = Intent(context, MainActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_IMMUTABLE and PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        PendingIntent.FLAG_IMMUTABLE and
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 }
 
 private fun getAlarmActionPending(context: Context): PendingIntent {
     val intent = Intent(context, AlarmActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
     return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_IMMUTABLE and PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+        PendingIntent.FLAG_IMMUTABLE and
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
