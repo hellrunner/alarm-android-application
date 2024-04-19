@@ -71,13 +71,14 @@ fun TimePickerDialog(
 
                 content()
 
-                Row( modifier = Modifier
-                    .height(40.dp)
-                    .fillMaxWidth()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
                 ) {
                     DaysOfWeek(week)
                 }
-                
+
                 Row(
                     modifier = Modifier
                         .height(40.dp)

@@ -1,5 +1,6 @@
 package com.example.alarmapplication.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
@@ -10,19 +11,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun DaysOfWeek(
-    days: List<String>,
+    days: List<String>
 ){
-    val daysOfWeek = remember { MutableStateFlow(listOf<String>()) }
-    val noteList by remember { daysOfWeek }.collectAsState()
-
-    var listMain: ArrayList<String> = ArrayList()
+    val listMain: ArrayList<String> = arrayListOf(" ", " ", " ", " ", " ", " ", " ")
 
     for (i in 0..6){
-        Day(i, days, listOfDaysStates(i), /*daysOfWeek, noteList*/listMain)
+        Day(i, days, listOfDaysStates(i), listMain)
     }
 }
 
@@ -31,10 +33,11 @@ fun Day(
     index: Int,
     days: List<String>,
     checkedStateFromList: MutableState<Boolean> = remember { mutableStateOf(true)},
-    chosenDays: ArrayList<String>
-    //daysOfWeek: MutableStateFlow<List<String>> = remember { MutableStateFlow(ArrayList()) },
-    //noteList: State<List<String>> = remember { daysOfWeek }.collectAsState(),
+    chosenDays: ArrayList<String>,
+    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel()
 ){
+    val context: Context = LocalContext.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -42,20 +45,16 @@ fun Day(
         Checkbox(
             checked = checkedStateFromList.value,
             onCheckedChange = {
-                if (checkedStateFromList.value) {
-                    /*noteList.add(days[index])
-                    daysOfWeek.value = noteList
-                    checkedStateFromList.value = !(it)*/
-                    //chosenDays.add(index, days[index])
+                if (!checkedStateFromList.value) {
+                    chosenDays.add(index, days[index])
                     checkedStateFromList.value = it
+                    daysOfWeekViewModal.setDays(chosenDays)
                 }
-                else if(!checkedStateFromList.value){
-                    /*val newList = ArrayList(noteList)
-                    newList.removeAt(index)
-                    daysOfWeek.value = newList
-                    checkedStateFromList.value = it*/
-                    //chosenDays.removeAt(index)
+                else if(checkedStateFromList.value){
+                    chosenDays.removeAt(index)
+                    chosenDays.add(index, " ")
                     checkedStateFromList.value = it
+                    daysOfWeekViewModal.setDays(chosenDays)
                 }
                 //TODO разобраться с обращением к каждому элементу строки
 
@@ -66,13 +65,13 @@ fun Day(
 
 @Composable
 fun listOfDaysStates(i: Int): MutableState<Boolean> {
-    val san = remember { mutableStateOf(true)}
-    val mon = remember { mutableStateOf(true)}
-    val tue = remember { mutableStateOf(true)}
-    val wend = remember { mutableStateOf(true)}
-    val th = remember { mutableStateOf(true)}
-    val fr = remember { mutableStateOf(true)}
-    val sat = remember { mutableStateOf(true)}
+    val san = remember { mutableStateOf(false)}
+    val mon = remember { mutableStateOf(false)}
+    val tue = remember { mutableStateOf(false)}
+    val wend = remember { mutableStateOf(false)}
+    val th = remember { mutableStateOf(false)}
+    val fr = remember { mutableStateOf(false)}
+    val sat = remember { mutableStateOf(false)}
     val listOfWeek = listOf(san, mon, tue, wend, th, fr,sat)
 
     return listOfWeek[i]

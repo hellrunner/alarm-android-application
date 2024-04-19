@@ -35,8 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
+import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.ui.components.AlarmItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +53,9 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun AlarmScreen() {
+fun AlarmScreen(
+    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel()
+) {
     var showTimePicker by remember { mutableStateOf(false) }
 
     val state = rememberTimePickerState()
@@ -88,7 +92,7 @@ fun AlarmScreen() {
         }
     }
 
-    if (showTimePicker){
+    if (showTimePicker) {
         TimePickerDialog(
             onCancel = { showTimePicker = false },
             onConfirm = {
@@ -101,21 +105,32 @@ fun AlarmScreen() {
                 }
 
                 if (canScheduleExactAlarms(context)) {
-                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(cal.timeInMillis, getAlarmPendingIntent(context))
+                    val alarmManager =
+                        context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(
+                        cal.timeInMillis,
+                        getAlarmPendingIntent(context)
+                    )
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
-
                     makeToast(context, simpleDateFormat.format(cal.time))
+
+                    val days = daysOfWeekViewModal.getDays()
+                    var _days = ""
+
+
+                    for(i in 0..<days.size) {
+                        _days += days[i] + " "
+                    }
 
                     val newList = ArrayList(noteList)
                     newList.add(
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            "Th",
-                            true)
+                            _days,
+                            true
+                        )
                     )
                     alarms.value = newList
-
 
                 }
                 showTimePicker = false
@@ -132,15 +147,19 @@ fun AlarmScreen() {
 private fun getAlarmPendingIntent(context: Context): PendingIntent {
     val intent = Intent(context, MainActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-    return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    return PendingIntent.getActivity(
+        context, 0, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 }
 
 private fun getAlarmActionPending(context: Context): PendingIntent {
     val intent = Intent(context, AlarmActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-    return PendingIntent.getActivity(context,0,intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+    return PendingIntent.getActivity(
+        context, 0, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -167,7 +186,7 @@ fun AddItem(
     alarms.value = newList
 }*/
 
-fun makeToast(context: Context, time: String){
+fun makeToast(context: Context, time: String) {
     Toast.makeText(
         context,
         "Будильник установлен на $time",
