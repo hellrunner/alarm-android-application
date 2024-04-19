@@ -1,5 +1,7 @@
 package com.example.alarmapplication.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -22,6 +24,7 @@ import com.example.alarmapplication.ui.screens.AlarmScreen
 import com.example.alarmapplication.ui.screens.ArticlesScreen
 import com.example.alarmapplication.ui.screens.MusicScreen
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun AppNavigation() {
     val navController: NavHostController = rememberNavController()
@@ -50,9 +53,6 @@ fun AppNavigation() {
                                 contentDescription = null
                             )
                         },
-//                        label = {
-//                            Text(text = navItem.label)
-//                        }
                     )
                 }
             }

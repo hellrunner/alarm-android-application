@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.AlarmApplication" parent="android:Theme.Material.Light.NoActionBar" />
-  <!-- Base application theme. -->
+        <item name="colorAccent" type="color">#FDFDFD</item>
+        <item name="colorOnPrimary" type="color">#FF018786</item>
+        <item name="colorSurface" type="color">#FF03DAC5</item>
     <style name="Base.Theme.AlarmApplication" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->

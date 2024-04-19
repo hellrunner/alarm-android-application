@@ -42,6 +42,7 @@ import com.example.alarmapplication.ui.components.AlarmItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
@@ -52,6 +53,7 @@ import java.util.Locale
 @Composable
 fun AlarmScreen() {
     var showTimePicker by remember { mutableStateOf(false) }
+
     val state = rememberTimePickerState()
     val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
     val snackState = remember { SnackbarHostState() }
@@ -113,17 +115,17 @@ fun AlarmScreen() {
                             true)
                     )
                     alarms.value = newList
-                }
 
+
+                }
                 showTimePicker = false
             })
         {
             TimePicker(state = state)
         }
 
-    }
 
-    //TODO Сделать вторую часть бужильника: реализвать запоминание выбора времени и активацию будильника
+    }
 
 }
 

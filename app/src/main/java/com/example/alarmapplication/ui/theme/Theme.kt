@@ -67,4 +67,5 @@ fun AlarmApplicationTheme(
         typography = Typography,
         content = content
     )
+
 }

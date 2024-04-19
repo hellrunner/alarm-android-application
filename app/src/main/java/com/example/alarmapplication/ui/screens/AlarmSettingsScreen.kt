@@ -1,10 +1,7 @@
 package com.example.alarmapplication.ui.screens
 
-import android.app.TimePickerDialog
-import android.content.Context
-import android.view.View
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -13,43 +10,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePickerColors
-import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.TimePickerLayoutType
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import androidx.compose.material3.TimePicker
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import com.example.alarmapplication.MainActivity
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
+import com.example.alarmapplication.ui.components.DaysOfWeek
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 @Composable
@@ -60,6 +38,8 @@ fun TimePickerDialog(
     toggle: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
+    val week: List<String> = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+
     Dialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(
@@ -88,7 +68,16 @@ fun TimePickerDialog(
                     text = title,
                     style = MaterialTheme.typography.labelMedium
                 )
+
                 content()
+
+                Row( modifier = Modifier
+                    .height(40.dp)
+                    .fillMaxWidth()
+                ) {
+                    DaysOfWeek(week)
+                }
+                
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -107,4 +96,7 @@ fun TimePickerDialog(
         }
     }
 }
+
+
+
 
