@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,11 +37,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
 import com.example.alarmapplication.model.Alarm
+import com.example.alarmapplication.navigation.Screens
 import com.example.alarmapplication.ui.components.AlarmItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -54,6 +58,7 @@ import java.util.Locale
 @Preview
 @Composable
 fun AlarmScreen(
+    navControllerFromAppNavigation: NavHostController = rememberNavController(),
     daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
     alarmsViewModel: AlarmsViewModel = viewModel()
 ) {
@@ -77,14 +82,15 @@ fun AlarmScreen(
     // Оптимизировать вызов будильника.
     // Сделать сохрание будильнков при выходе из приложения
 
-    if (alarmsViewModel.getExistAlarms().isNotEmpty()) {
-        val u: ArrayList<Alarm> = arrayListOf()
-        u.addAll(alarmsViewModel.getExistAlarms())
-    }
-
     LazyColumn(
         verticalArrangement = Arrangement.Center,
     ) {
+        if (alarmsViewModel.getExistAlarms().isNotEmpty() and alarmsViewModel.flagOnAlarmScreen) {
+            val initializerArrayList: ArrayList<Alarm> = alarmsViewModel.getExistAlarms()
+            var i = ArrayList(noteList)
+            i = initializerArrayList
+            alarms.value = i
+        }
         items(alarms.value) { alarm ->
             AlarmItem(alarm = alarm)
         }
@@ -133,32 +139,49 @@ fun AlarmScreen(
                     )
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
 
-                    makeToast(context, simpleDateFormat.format(cal.time))
-
-                    val newList = ArrayList(noteList)
-                    newList.add(
+                    val tempNewList = ArrayList(noteList)
+                    val alarm =
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            getChosenDays(
-                                daysOfWeekViewModal.getDays(
-                                    daysOfWeekViewModal.getCountOfAlarms()
-                                )
-                            ),
+                            getChosenDays(daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())),
                             true
                         )
-                    )
-                    alarms.value = newList
+
+                    tempNewList.add(alarm)
+                    alarms.value = tempNewList
                     daysOfWeekViewModal.setCountOfAlarms()
+
+                    alarmsViewModel.setAlarms(alarm)
+                    alarmsViewModel.flag = false
                 }
                 showTimePicker = false
+                makeToast(context, simpleDateFormat.format(cal.time))
 
             })
         {
             TimePicker(state = state)
         }
 
+    }
+
+    navControllerFromAppNavigation.addOnDestinationChangedListener { _, destination, _ ->
+        if (
+            (destination.route == Screens.MusicScreen.name) or
+            (destination.route == Screens.ArticlesScreen.name)
+        )
+        {
+            if (alarmsViewModel.flagOnAlarmScreen) {
+                alarmsViewModel.flagOnAlarmScreen = false
+            }
+
+        }
+        else if (destination.route == Screens.AlarmScreen.name)
+        {
+            alarmsViewModel.flagOnAlarmScreen = true
+        }
 
     }
+
 
 }
 

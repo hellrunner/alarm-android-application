@@ -65,7 +65,7 @@ fun AppNavigation() {
                 .padding(paddingValues)
         ) {
             composable(route = Screens.AlarmScreen.name) {
-                AlarmScreen()
+                AlarmScreen(navController)
             }
 
             composable(route = Screens.MusicScreen.name) {

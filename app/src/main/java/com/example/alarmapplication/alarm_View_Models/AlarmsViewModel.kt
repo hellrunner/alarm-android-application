@@ -5,10 +5,12 @@ import com.example.alarmapplication.model.Alarm
 import kotlin.collections.ArrayList
 
 class AlarmsViewModel : ViewModel(){
-    private val alarms = ArrayList<Alarm>()
+    private val alarms: ArrayList<Alarm> = arrayListOf()
+    var flag: Boolean = true
+    var flagOnAlarmScreen: Boolean = true
 
-    fun setAlarms(arrayList: ArrayList<Alarm>){
-        alarms.addAll(arrayList)
+    fun setAlarms(alarm: Alarm){
+        alarms.add(alarm)
     }
 
     fun getExistAlarms(): ArrayList<Alarm>{
