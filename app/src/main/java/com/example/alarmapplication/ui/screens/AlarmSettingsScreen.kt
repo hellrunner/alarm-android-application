@@ -38,8 +38,6 @@ fun TimePickerDialog(
     toggle: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val week: List<String> = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-
     Dialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(
@@ -76,7 +74,7 @@ fun TimePickerDialog(
                         .height(40.dp)
                         .fillMaxWidth()
                 ) {
-                    DaysOfWeek(week)
+                    DaysOfWeek()
                 }
 
                 Row(
@@ -86,12 +84,8 @@ fun TimePickerDialog(
                 ) {
                     toggle()
                     Spacer(modifier = Modifier.weight(1f))
-                    TextButton(
-                        onClick = { onCancel() }
-                    ) { Text("Cancel") }
-                    TextButton(
-                        onClick = { onConfirm() }
-                    ) { Text("OK") }
+                    TextButton(onClick = { onCancel() }) { Text("Cancel") }
+                    TextButton(onClick = { onConfirm() }) { Text("OK") }
                 }
             }
         }

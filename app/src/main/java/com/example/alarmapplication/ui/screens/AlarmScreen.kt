@@ -38,13 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
+import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.ui.components.AlarmItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
@@ -54,20 +54,33 @@ import java.util.Locale
 @Preview
 @Composable
 fun AlarmScreen(
-    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel()
+    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
+    alarmsViewModel: AlarmsViewModel = viewModel()
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val state = rememberTimePickerState()
     val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+    val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    val state = rememberTimePickerState()
     val snackState = remember { SnackbarHostState() }
+
     val snackScope = rememberCoroutineScope()
     val context = LocalContext.current
+
     var cal: Calendar
-    val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
     val noteList by remember { alarms }.collectAsState()
+
+    //TODO сделать сохранение будильников припереключение экранов приложения.
+    // Оптимизировать вызов будильника.
+    // Сделать сохрание будильнков при выходе из приложения
+
+    if (alarmsViewModel.getExistAlarms().isNotEmpty()) {
+        val u: ArrayList<Alarm> = arrayListOf()
+        u.addAll(alarmsViewModel.getExistAlarms())
+    }
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
@@ -76,7 +89,6 @@ fun AlarmScreen(
             AlarmItem(alarm = alarm)
         }
     }
-
 
     Box(
         modifier = Modifier
@@ -107,33 +119,39 @@ fun AlarmScreen(
                 if (canScheduleExactAlarms(context)) {
                     val alarmManager =
                         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                    /*alarmManager.setInexactRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        cal.timeInMillis,
+                        AlarmManager.INTERVAL_DAY,
+                        getAlarmActionPending(context)
+                    )*/
+
                     val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(
                         cal.timeInMillis,
                         getAlarmPendingIntent(context)
                     )
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
+
                     makeToast(context, simpleDateFormat.format(cal.time))
-
-                    val days = daysOfWeekViewModal.getDays()
-                    var _days = ""
-
-
-                    for(i in 0..<days.size) {
-                        _days += days[i] + " "
-                    }
 
                     val newList = ArrayList(noteList)
                     newList.add(
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            _days,
+                            getChosenDays(
+                                daysOfWeekViewModal.getDays(
+                                    daysOfWeekViewModal.getCountOfAlarms()
+                                )
+                            ),
                             true
                         )
                     )
                     alarms.value = newList
-
+                    daysOfWeekViewModal.setCountOfAlarms()
                 }
                 showTimePicker = false
+
             })
         {
             TimePicker(state = state)
@@ -168,28 +186,23 @@ fun canScheduleExactAlarms(context: Context): Boolean {
     return alarmManager?.canScheduleExactAlarms() ?: false
 }
 
-/*@Composable Если будет не впадлу, то можо сделать отдельный метод добавления элемента
-fun AddItem(
-    alarms: MutableStateFlow<List<Alarm>> =
-        remember { MutableStateFlow(listOf()) },
-    noteList: List<Alarm>,
-    time: String)
-{
-
-    val newList = ArrayList(noteList)
-    newList.add(
-        Alarm(
-            time,
-            "Th",
-            true)
-    )
-    alarms.value = newList
-}*/
-
 fun makeToast(context: Context, time: String) {
     Toast.makeText(
         context,
         "Будильник установлен на $time",
         Toast.LENGTH_SHORT
     ).show()
+}
+
+fun getChosenDays(numOfArray: ArrayList<String>): String {
+    var days = ""
+    for (i in 0..<numOfArray.size) {
+        days +=
+            if (i == numOfArray.size - 1) {
+                numOfArray[i]
+            } else {
+                numOfArray[i] + " "
+            }
+    }
+    return days
 }

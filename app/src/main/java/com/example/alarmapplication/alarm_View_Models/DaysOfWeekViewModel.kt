@@ -2,19 +2,35 @@ package com.example.alarmapplication.alarm_View_Models
 
 import androidx.lifecycle.ViewModel
 
-class DaysOfWeekViewModel : ViewModel(){
-    private var chosenDays: MutableSet<String> = mutableSetOf(" ")
+class DaysOfWeekViewModel : ViewModel() {
+    private var chosenDays: ArrayList<String> = arrayListOf()
+    private var alarm: ArrayList<ArrayList<String>> = arrayListOf()
 
-    fun setDays(list: ArrayList<String>){
-        list.toSet()
-        chosenDays.addAll(list)
+    private var countOfAlarm: Int = 0
+
+    fun setDays(list: ArrayList<String>) {
+        val tempArray: ArrayList<String> = arrayListOf()
+        if (alarm.getOrNull(countOfAlarm) == null){
+            alarm.add(tempArray)
+            alarm[countOfAlarm] = list
+        }
+        else{
+            alarm[countOfAlarm] = list
+        }
+
     }
 
-    fun getDays(): ArrayList<String>{
-        var _tempList: ArrayList<String> = arrayListOf()
-        _tempList.addAll(chosenDays)
-        _tempList.removeAll {it == " "}
-        return _tempList
+    fun getDays(index: Int): ArrayList<String> {
+        alarm[index].removeAll { it == " " }
+        return alarm[index]
+    }
+
+    fun setCountOfAlarms() {
+        countOfAlarm++
+    }
+
+    fun getCountOfAlarms(): Int {
+        return countOfAlarm
     }
 
 }
