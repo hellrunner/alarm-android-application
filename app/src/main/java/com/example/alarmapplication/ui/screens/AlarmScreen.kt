@@ -24,7 +24,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +42,7 @@ import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
+import com.example.alarmapplication.alarm_View_Models.SwitchViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.navigation.Screens
 import com.example.alarmapplication.ui.components.AlarmItem
@@ -60,7 +60,8 @@ import java.util.Locale
 fun AlarmScreen(
     navControllerFromAppNavigation: NavHostController = rememberNavController(),
     daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
-    alarmsViewModel: AlarmsViewModel = viewModel()
+    alarmsViewModel: AlarmsViewModel = viewModel(),
+    switchViewModel: SwitchViewModel = viewModel()
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -78,9 +79,11 @@ fun AlarmScreen(
     val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
     val noteList by remember { alarms }.collectAsState()
 
-    //TODO сделать сохранение будильников припереключение экранов приложения.
+
+    //TODO
     // Оптимизировать вызов будильника.
     // Сделать сохрание будильнков при выходе из приложения
+    // Оптимизировать кол-во переменных и распределить их по классам по своей смысловой нагрузке
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
@@ -143,16 +146,21 @@ fun AlarmScreen(
                     val alarm =
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            getChosenDays(daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())),
-                            true
+                            getChosenDays(
+                                daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())
+                            ),
+                            stateOnOff = true,
+                            existAlarm = false,
+                            index = alarmsViewModel.indexOfAlarm
                         )
 
                     tempNewList.add(alarm)
                     alarms.value = tempNewList
-                    daysOfWeekViewModal.setCountOfAlarms()
 
+                    daysOfWeekViewModal.setCountOfAlarms()
                     alarmsViewModel.setAlarms(alarm)
                     alarmsViewModel.flag = false
+                    alarmsViewModel.plusToIndexOfAlarm()
                 }
                 showTimePicker = false
                 makeToast(context, simpleDateFormat.format(cal.time))
@@ -165,18 +173,11 @@ fun AlarmScreen(
     }
 
     navControllerFromAppNavigation.addOnDestinationChangedListener { _, destination, _ ->
-        if (
-            (destination.route == Screens.MusicScreen.name) or
-            (destination.route == Screens.ArticlesScreen.name)
-        )
-        {
+        if ((destination.route == Screens.MusicScreen.name) or (destination.route == Screens.ArticlesScreen.name)) {
             if (alarmsViewModel.flagOnAlarmScreen) {
                 alarmsViewModel.flagOnAlarmScreen = false
             }
-
-        }
-        else if (destination.route == Screens.AlarmScreen.name)
-        {
+        } else if (destination.route == Screens.AlarmScreen.name) {
             alarmsViewModel.flagOnAlarmScreen = true
         }
 

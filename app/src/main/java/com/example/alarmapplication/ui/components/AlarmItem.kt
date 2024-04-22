@@ -17,11 +17,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alarmapplication.alarm_View_Models.SwitchViewModel
 import com.example.alarmapplication.model.Alarm
 
 @Composable
-fun AlarmItem(alarm: Alarm) {
-    val checkedState = remember { mutableStateOf(alarm.state) }
+fun AlarmItem(
+    alarm: Alarm,
+    switchViewModel: SwitchViewModel = viewModel(),
+) {
+    val checkedState = remember { mutableStateOf(alarm.stateOnOff) }
+    if (switchViewModel.getSwitches().isNotEmpty() and alarm.existAlarm) {
+        checkedState.value = switchViewModel.getSwitch(alarm.index)
+        alarm.existAlarm = true
+    } else {
+        switchViewModel.setSwitch(checkedState.value, alarm.index)
+        alarm.existAlarm = true
+    }
     Surface(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -53,8 +65,10 @@ fun AlarmItem(alarm: Alarm) {
                     modifier = Modifier.padding(12.dp)
                 )
                 Switch(
-                    checked = checkedState.value, onCheckedChange = {
+                    checked = checkedState.value,
+                    onCheckedChange = {
                         checkedState.value = it
+                        switchViewModel.setSwitch(checkedState.value, alarm.index)
                     }
                 )
             }

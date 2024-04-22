@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
+import com.example.alarmapplication.alarm_View_Models.SwitchViewModel
 
 @Composable
 fun DaysOfWeek() {
@@ -27,7 +28,7 @@ fun Day(
     days: List<String>,
     checkedStateFromList: MutableState<Boolean> = remember { mutableStateOf(true) },
     chosenDays: ArrayList<String>,
-    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel()
+    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
