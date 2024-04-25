@@ -7,6 +7,7 @@ import android.widget.TimePicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -34,15 +36,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.alarmapplication.R
+import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
 @RequiresApi(Build.VERSION_CODES.O)
+@Preview
 @Composable
 fun MusicScreen() {
     val context = LocalContext.current
@@ -59,6 +64,20 @@ fun MusicScreen() {
     var showTimePicker by remember { mutableStateOf(false) }
     var selectedTime by remember { mutableStateOf(LocalTime.of(0, 0)) }
 
+    var sleepTimes by remember { mutableStateOf(listOf<LocalTime>()) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayers.values.forEach { mediaPlayer ->
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.stop()
+                }
+                mediaPlayer.release()
+            }
+            mediaPlayers.clear()
+        }
+
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -89,29 +108,39 @@ fun MusicScreen() {
         }
 
         Card(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(30.dp),
             border = BorderStroke(1.dp, Color.White)
         ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Выбранное время: ${selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    text = "Выбранное время:\n${selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Button(
-            onClick = { showTimePicker = true },
-        ) {
-            Text(text = "Установить время пробуждения")
+                Button(
+                    modifier = Modifier.padding(5.dp),
+                    onClick = { showTimePicker = true },
+                ) {
+                    Text(text = "Установить время пробуждения")
+                }
+            }
         }
         if (showTimePicker) {
             val pickerDialog = android.app.TimePickerDialog(
                 context,
                 { _, hour, minute ->
-                    selectedTime = LocalTime.of(hour, minute)
+                    val newWakeUpTime = LocalTime.of(hour, minute)
+                    selectedTime = newWakeUpTime
+                    sleepTimes = calculateSleepTimes(newWakeUpTime)
                     showTimePicker = false
                 },
                 selectedTime.hour,
@@ -124,11 +153,16 @@ fun MusicScreen() {
             }
             pickerDialog.show()
         }
-
-
+        Spacer(modifier = Modifier.height(40.dp))
+        Text(
+            text = "Нужно лечь в:",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        SleepTimeCards(sleepTimes = sleepTimes)
     }
 }
-
 
 @Composable
 fun MusicButton(
@@ -139,16 +173,23 @@ fun MusicButton(
 ) {
     Button(
         onClick = {
-            mediaPlayers.getOrPut(trackId) { MediaPlayer.create(context, trackId) }.apply {
-                if (isPlaying[trackId] == true) {
-                    pause()
-                    isPlaying[trackId] = false
-                } else {
-                    start()
-                    isPlaying[trackId] = true
-                    isLooping = true
+            val currentPlayer = mediaPlayers.getOrPut(trackId) {
+                MediaPlayer.create(context, trackId).apply { isLooping = true }
+            }
+            val currentIsPlaying = isPlaying[trackId] == true
+            // Stop all other tracks before starting this one
+            mediaPlayers.forEach { (id, player) ->
+                if (id != trackId && isPlaying[id] == true) {
+                    player.pause()
+                    isPlaying[id] = false
                 }
             }
+            if (currentIsPlaying) {
+                currentPlayer.pause()
+            } else {
+                currentPlayer.start()
+            }
+            isPlaying[trackId] = !currentIsPlaying
         },
         modifier = Modifier.size(120.dp, 80.dp),
         shape = RoundedCornerShape(8.dp)
@@ -168,9 +209,49 @@ fun MusicButton(
     }
 }
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview
+fun calculateSleepTimes(wakeUpTime: LocalTime): List<LocalTime> {
+    val cycleDuration = Duration.ofMinutes(90)
+    return List(6) { wakeUpTime.minusMinutes((it + 1) * cycleDuration.toMinutes()) }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ViewMusic() {
-    MusicScreen()
+fun SleepTimeCards(sleepTimes: List<LocalTime>) {
+    val numberOfRows = 2
+    val numberOfItemsPerRow = sleepTimes.size / numberOfRows
+
+    Column {
+        for (i in 0 until numberOfRows) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                for (j in 0 until numberOfItemsPerRow) {
+                    val sleepTime = sleepTimes.getOrNull(i * numberOfItemsPerRow + j) ?: break
+                    TimeCard(time = sleepTime)
+                }
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun TimeCard(time: LocalTime) {
+    Card(
+        modifier = Modifier.padding(4.dp),
+    ) {
+        Text(
+            text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+            modifier = Modifier.padding(16.dp),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
+        )
+    }
 }
