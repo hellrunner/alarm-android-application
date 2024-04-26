@@ -48,6 +48,17 @@ import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
+
+
+/**
+ * Основной экран приложения будильник.
+ *
+ * Дисплей для настройки и просмотра будильников. Позволяет пользователям выбирать время для будильника,
+ * просматривать список установленных будильников и добавлять новые с помощью диалогового окна выбора времени.
+ * Также поддерживает показ уведомлений с выбранным временем.
+ *
+ * @param daysOfWeekViewModel Модель представления, отвечающая за управление днями недели.
+ */
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,6 +155,12 @@ fun AlarmScreen(
 
 }
 
+/**
+ * Создает PendingIntent для будильника, который запускает главную активность при срабатывании будильника.
+ *
+ * @param context Контекст приложения.
+ * @return Возвращает PendingIntent для активации главной активности.
+ */
 private fun getAlarmPendingIntent(context: Context): PendingIntent {
     val intent = Intent(context, MainActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -153,6 +170,12 @@ private fun getAlarmPendingIntent(context: Context): PendingIntent {
     )
 }
 
+/**
+ * Создает PendingIntent для действия будильника.
+ *
+ * @param context Контекст приложения.
+ * @return Возвращает PendingIntent для действия будильника.
+ */
 private fun getAlarmActionPending(context: Context): PendingIntent {
     val intent = Intent(context, AlarmActivity::class.java)
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -162,6 +185,16 @@ private fun getAlarmActionPending(context: Context): PendingIntent {
     )
 }
 
+
+/**
+ * Проверяет, может ли приложение запланировать точные будильники на устройстве.
+ *
+ * Эта функция необходима для корректной работы будильников на Android версий S и выше, где
+ * требуются специальные разрешения для точной установки будильников.
+ *
+ * @param context Контекст приложения.
+ * @return Возвращает true, если установка точных будильников возможна, иначе false.
+ */
 @RequiresApi(Build.VERSION_CODES.S)
 fun canScheduleExactAlarms(context: Context): Boolean {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
@@ -186,6 +219,13 @@ fun AddItem(
     alarms.value = newList
 }*/
 
+
+/**
+ * Показывает всплывающее уведомление (toast) с сообщением о времени установленного будильника.
+ *
+ * @param context Контекст приложения.
+ * @param time Строковое представление времени, на которое установлен будильник.
+ */
 fun makeToast(context: Context, time: String) {
     Toast.makeText(
         context,

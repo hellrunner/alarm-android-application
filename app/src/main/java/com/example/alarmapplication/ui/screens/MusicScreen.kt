@@ -3,11 +3,9 @@ package com.example.alarmapplication.ui.screens
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Build
-import android.widget.TimePicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,13 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,8 +72,8 @@ fun MusicScreen() {
             }
             mediaPlayers.clear()
         }
-
     }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -104,7 +100,9 @@ fun MusicScreen() {
                     )
                 }
             }
+
             Spacer(modifier = Modifier.height(20.dp))
+
         }
 
         Card(
@@ -153,7 +151,9 @@ fun MusicScreen() {
             }
             pickerDialog.show()
         }
+
         Spacer(modifier = Modifier.height(40.dp))
+
         Text(
             text = "Нужно лечь в:",
             fontSize = 18.sp,
@@ -177,7 +177,6 @@ fun MusicButton(
                 MediaPlayer.create(context, trackId).apply { isLooping = true }
             }
             val currentIsPlaying = isPlaying[trackId] == true
-            // Stop all other tracks before starting this one
             mediaPlayers.forEach { (id, player) ->
                 if (id != trackId && isPlaying[id] == true) {
                     player.pause()
@@ -208,7 +207,6 @@ fun MusicButton(
         )
     }
 }
-
 
 
 @RequiresApi(Build.VERSION_CODES.O)

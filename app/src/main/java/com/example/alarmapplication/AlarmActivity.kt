@@ -8,6 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 
+/**
+ * Активность для срабатывания будильника.
+ *
+ * Отображает текстовое сообщение, когда будильник срабатывает, и воспроизводит звуковой сигнал.
+ * Использует стандартный звуковой сигнал для будильника из системных настроек устройства.
+ *
+ * Активность также управляет жизненным циклом звукового сигнала будильника, останавливая его при уничтожении активности.
+ */
 class AlarmActivity : ComponentActivity() {
 
     private lateinit var ringtone: Ringtone
