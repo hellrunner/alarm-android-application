@@ -6,7 +6,6 @@ import kotlin.collections.ArrayList
 
 class AlarmsViewModel : ViewModel() {
     private val alarms: ArrayList<Alarm> = arrayListOf()
-    var flag: Boolean = true
     var flagOnAlarmScreen: Boolean = true
     var indexOfAlarm = 0
 
@@ -21,4 +20,5 @@ class AlarmsViewModel : ViewModel() {
     fun plusToIndexOfAlarm() {
         indexOfAlarm++
     }
+
 }

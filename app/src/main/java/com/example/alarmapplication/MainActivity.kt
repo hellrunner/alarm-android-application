@@ -5,12 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.navigation.AppNavigation
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -18,4 +19,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+
+        super.onResume()
+    }
 }
+
+@Composable
+fun SaveAlarms(alarmsViewModel: AlarmsViewModel = viewModel()){
+
+}
+
+

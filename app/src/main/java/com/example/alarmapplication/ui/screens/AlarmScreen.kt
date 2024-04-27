@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -42,7 +43,6 @@ import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
-import com.example.alarmapplication.alarm_View_Models.SwitchViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.navigation.Screens
 import com.example.alarmapplication.ui.components.AlarmItem
@@ -61,9 +61,8 @@ fun AlarmScreen(
     navControllerFromAppNavigation: NavHostController = rememberNavController(),
     daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
     alarmsViewModel: AlarmsViewModel = viewModel(),
-    switchViewModel: SwitchViewModel = viewModel()
 ) {
-    var showTimePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) } //Показать тайм пикер
 
     val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
     val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -79,6 +78,8 @@ fun AlarmScreen(
     val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
     val noteList by remember { alarms }.collectAsState()
 
+    val sharedPreferences = getSharedPreferences()
+    val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
     //TODO
     // Оптимизировать вызов будильника.
@@ -90,12 +91,12 @@ fun AlarmScreen(
     ) {
         if (alarmsViewModel.getExistAlarms().isNotEmpty() and alarmsViewModel.flagOnAlarmScreen) {
             val initializerArrayList: ArrayList<Alarm> = alarmsViewModel.getExistAlarms()
-            var i = ArrayList(noteList)
-            i = initializerArrayList
-            alarms.value = i
+            val bufferArray: ArrayList<Alarm> = initializerArrayList
+            alarms.value = bufferArray
         }
         items(alarms.value) { alarm ->
-            AlarmItem(alarm = alarm)
+            AlarmItem(alarm = alarm) //Создаём карточку будильника.
+        // Тут много раз вызывается функция AlarmItem
         }
     }
 
@@ -149,8 +150,8 @@ fun AlarmScreen(
                             getChosenDays(
                                 daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())
                             ),
-                            stateOnOff = true,
-                            existAlarm = false,
+                            stateOnOff = true,//При создании будильника он будет включённым
+                            existAlarm = false, //Его пока ещё нет
                             index = alarmsViewModel.indexOfAlarm
                         )
 
@@ -159,7 +160,6 @@ fun AlarmScreen(
 
                     daysOfWeekViewModal.setCountOfAlarms()
                     alarmsViewModel.setAlarms(alarm)
-                    alarmsViewModel.flag = false
                     alarmsViewModel.plusToIndexOfAlarm()
                 }
                 showTimePicker = false
@@ -184,6 +184,12 @@ fun AlarmScreen(
     }
 
 
+}
+
+@Composable
+fun getSharedPreferences(): SharedPreferences {
+    val context = LocalContext.current
+    return context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
 }
 
 private fun getAlarmPendingIntent(context: Context): PendingIntent {
