@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -55,13 +56,14 @@ import java.util.Locale
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun AlarmScreen(
     navControllerFromAppNavigation: NavHostController = rememberNavController(),
+    alarmsViewModel: AlarmsViewModel,
     daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
-    alarmsViewModel: AlarmsViewModel = viewModel(),
 ) {
+
+
     var showTimePicker by remember { mutableStateOf(false) } //Показать тайм пикер
 
     val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
@@ -77,14 +79,6 @@ fun AlarmScreen(
 
     val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
     val noteList by remember { alarms }.collectAsState()
-
-    val sharedPreferences = getSharedPreferences()
-    val editor: SharedPreferences.Editor = sharedPreferences.edit()
-
-    //TODO
-    // Оптимизировать вызов будильника.
-    // Сделать сохрание будильнков при выходе из приложения
-    // Оптимизировать кол-во переменных и распределить их по классам по своей смысловой нагрузке
 
     LazyColumn(
         verticalArrangement = Arrangement.Center,
@@ -184,12 +178,6 @@ fun AlarmScreen(
     }
 
 
-}
-
-@Composable
-fun getSharedPreferences(): SharedPreferences {
-    val context = LocalContext.current
-    return context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
 }
 
 private fun getAlarmPendingIntent(context: Context): PendingIntent {

@@ -20,13 +20,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.ui.screens.AlarmScreen
 import com.example.alarmapplication.ui.screens.ArticlesScreen
 import com.example.alarmapplication.ui.screens.MusicScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(alarmsViewModel: AlarmsViewModel) {
     val navController: NavHostController = rememberNavController()
 
     Scaffold(
@@ -65,7 +66,7 @@ fun AppNavigation() {
                 .padding(paddingValues)
         ) {
             composable(route = Screens.AlarmScreen.name) {
-                AlarmScreen(navController)
+                AlarmScreen(navController, alarmsViewModel)
             }
 
             composable(route = Screens.MusicScreen.name) {
