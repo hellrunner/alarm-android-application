@@ -1,13 +1,17 @@
 package com.example.alarmapplication.ui.screens
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
-import android.widget.TimePicker
+import android.provider.Settings
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,13 +23,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,8 +43,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.alarmapplication.R
+import com.example.alarmapplication.ui.SleepReminderBroadcastReceiver
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
@@ -160,7 +165,7 @@ fun MusicScreen() {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        SleepTimeCards(sleepTimes = sleepTimes)
+        SleepTimeCards(sleepTimes = sleepTimes, context = context)
     }
 }
 
@@ -210,7 +215,6 @@ fun MusicButton(
 }
 
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 fun calculateSleepTimes(wakeUpTime: LocalTime): List<LocalTime> {
     val cycleDuration = Duration.ofMinutes(90)
@@ -220,7 +224,7 @@ fun calculateSleepTimes(wakeUpTime: LocalTime): List<LocalTime> {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SleepTimeCards(sleepTimes: List<LocalTime>) {
+fun SleepTimeCards(sleepTimes: List<LocalTime>, context: Context) {
     val numberOfRows = 2
     val numberOfItemsPerRow = sleepTimes.size / numberOfRows
 
@@ -234,18 +238,30 @@ fun SleepTimeCards(sleepTimes: List<LocalTime>) {
             ) {
                 for (j in 0 until numberOfItemsPerRow) {
                     val sleepTime = sleepTimes.getOrNull(i * numberOfItemsPerRow + j) ?: break
-                    TimeCard(time = sleepTime)
+                    TimeCard(time = sleepTime, context = context)
                 }
             }
         }
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TimeCard(time: LocalTime) {
+fun TimeCard(time: LocalTime, context: Context) {
     Card(
-        modifier = Modifier.padding(4.dp),
+        modifier = Modifier
+            .padding(4.dp)
+            .clickable {
+                Toast
+                    .makeText(
+                        context,
+                        "Уведомление установленно на ${time.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+                setSleepReminder(time, context)
+            },
     ) {
         Text(
             text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
@@ -255,3 +271,50 @@ fun TimeCard(time: LocalTime) {
         )
     }
 }
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun setSleepReminder(time: LocalTime, context: Context) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        return
+    }
+
+    val intent = Intent(context, SleepReminderBroadcastReceiver::class.java)
+
+    val requestCode = time.toSecondOfDay()
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        requestCode, // Уникальный код запроса для каждого времени сна
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    var triggerAtMillis = LocalDateTime.now()
+        .withHour(time.hour)
+        .withMinute(time.minute)
+        .withSecond(0)
+        .withNano(0)
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
+
+    // Проверка, не настроено ли время срабатывания на прошлое. Если да, то добавляем сутки.
+    val currentMillis = System.currentTimeMillis()
+    if (triggerAtMillis <= currentMillis) {
+        triggerAtMillis += Duration.ofDays(1).toMillis()
+    }
+
+    // Установка точного будильника, который сработает даже в энергосберегающем режиме
+    alarmManager.setExactAndAllowWhileIdle(
+        AlarmManager.RTC_WAKEUP,
+        triggerAtMillis,
+        pendingIntent
+    )
+}
+
+
