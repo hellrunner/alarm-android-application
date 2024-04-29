@@ -90,7 +90,7 @@ fun AlarmScreen(
         }
         items(alarms.value) { alarm ->
             AlarmItem(alarm = alarm) //Создаём карточку будильника.
-        // Тут много раз вызывается функция AlarmItem
+            // Тут много раз вызывается функция AlarmItem
         }
     }
 
@@ -138,12 +138,19 @@ fun AlarmScreen(
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
 
                     val tempNewList = ArrayList(noteList)
+
+                    val chosenDay =
+                        if (daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())[0] != "Not value")
+                        {
+                            getChosenDays(daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms()))
+                        } else {
+                            "Ежедневно"
+                        }
+
                     val alarm =
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            getChosenDays(
-                                daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())
-                            ),
+                            chosenDay,
                             stateOnOff = true,//При создании будильника он будет включённым
                             existAlarm = false, //Его пока ещё нет
                             index = alarmsViewModel.indexOfAlarm
@@ -176,7 +183,6 @@ fun AlarmScreen(
         }
 
     }
-
 
 }
 
@@ -213,6 +219,9 @@ fun makeToast(context: Context, time: String) {
 }
 
 fun getChosenDays(numOfArray: ArrayList<String>): String {
+    if (numOfArray.isEmpty()){
+        return "No days"
+    }
     var days = ""
     for (i in 0..<numOfArray.size) {
         days +=

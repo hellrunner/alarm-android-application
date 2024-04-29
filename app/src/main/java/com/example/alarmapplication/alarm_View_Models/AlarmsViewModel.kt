@@ -29,7 +29,7 @@ class AlarmsViewModel : ViewModel() {
                     if (tempStr?.get(0).toString() != "No")  {
                         val alarm = Alarm( //Создаём будильник с полученными данными
                             tempStr?.get(0).toString(),
-                            tempStr?.get(1).toString(),
+                            tempStr?.get(1).toString().replace(",", " "),
                             tempStr?.get(2)?.toBoolean() ?: true,
                             tempStr?.get(3)?.toBoolean() ?: true,
                             tempStr?.get(4)?.toInt() ?: 0
