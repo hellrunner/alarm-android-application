@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -42,7 +44,6 @@ import com.example.alarmapplication.AlarmActivity
 import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
 import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
-import com.example.alarmapplication.alarm_View_Models.SwitchViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.navigation.Screens
 import com.example.alarmapplication.ui.components.AlarmItem
@@ -55,15 +56,15 @@ import java.util.Locale
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun AlarmScreen(
     navControllerFromAppNavigation: NavHostController = rememberNavController(),
+    alarmsViewModel: AlarmsViewModel,
     daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
-    alarmsViewModel: AlarmsViewModel = viewModel(),
-    switchViewModel: SwitchViewModel = viewModel()
 ) {
-    var showTimePicker by remember { mutableStateOf(false) }
+
+
+    var showTimePicker by remember { mutableStateOf(false) } //Показать тайм пикер
 
     val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
     val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -79,23 +80,17 @@ fun AlarmScreen(
     val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
     val noteList by remember { alarms }.collectAsState()
 
-
-    //TODO
-    // Оптимизировать вызов будильника.
-    // Сделать сохрание будильнков при выходе из приложения
-    // Оптимизировать кол-во переменных и распределить их по классам по своей смысловой нагрузке
-
     LazyColumn(
         verticalArrangement = Arrangement.Center,
     ) {
         if (alarmsViewModel.getExistAlarms().isNotEmpty() and alarmsViewModel.flagOnAlarmScreen) {
             val initializerArrayList: ArrayList<Alarm> = alarmsViewModel.getExistAlarms()
-            var i = ArrayList(noteList)
-            i = initializerArrayList
-            alarms.value = i
+            val bufferArray: ArrayList<Alarm> = initializerArrayList
+            alarms.value = bufferArray
         }
         items(alarms.value) { alarm ->
-            AlarmItem(alarm = alarm)
+            AlarmItem(alarm = alarm) //Создаём карточку будильника.
+            // Тут много раз вызывается функция AlarmItem
         }
     }
 
@@ -143,14 +138,21 @@ fun AlarmScreen(
                     alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
 
                     val tempNewList = ArrayList(noteList)
+
+                    val chosenDay =
+                        if (daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())[0] != "Not value")
+                        {
+                            getChosenDays(daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms()))
+                        } else {
+                            "Ежедневно"
+                        }
+
                     val alarm =
                         Alarm(
                             simpleDateFormat.format(cal.time),
-                            getChosenDays(
-                                daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())
-                            ),
-                            stateOnOff = true,
-                            existAlarm = false,
+                            chosenDay,
+                            stateOnOff = true,//При создании будильника он будет включённым
+                            existAlarm = false, //Его пока ещё нет
                             index = alarmsViewModel.indexOfAlarm
                         )
 
@@ -159,7 +161,6 @@ fun AlarmScreen(
 
                     daysOfWeekViewModal.setCountOfAlarms()
                     alarmsViewModel.setAlarms(alarm)
-                    alarmsViewModel.flag = false
                     alarmsViewModel.plusToIndexOfAlarm()
                 }
                 showTimePicker = false
@@ -182,7 +183,6 @@ fun AlarmScreen(
         }
 
     }
-
 
 }
 
@@ -219,6 +219,9 @@ fun makeToast(context: Context, time: String) {
 }
 
 fun getChosenDays(numOfArray: ArrayList<String>): String {
+    if (numOfArray.isEmpty()){
+        return "No days"
+    }
     var days = ""
     for (i in 0..<numOfArray.size) {
         days +=

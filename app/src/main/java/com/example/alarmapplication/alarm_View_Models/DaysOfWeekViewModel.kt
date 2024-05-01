@@ -17,7 +17,14 @@ class DaysOfWeekViewModel : ViewModel() {
     }
 
     fun getDays(index: Int): ArrayList<String> {
-        alarm[index].removeAll { it == " " }
+        if (alarm.getOrNull(index) != null){
+            alarm[index].removeAll { it == " " }
+        }
+        else {
+            val tempArray: ArrayList<String> = arrayListOf("Not value")
+            val noAlarm: ArrayList<ArrayList<String>> = arrayListOf(tempArray)
+            return noAlarm[0]
+        }
         return alarm[index]
     }
 
