@@ -14,42 +14,31 @@ import com.example.alarmapplication.R
 
 class SleepReminderBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val alarmTime = intent.getStringExtra("alarmTime") ?: "Неизвестно"
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val channelId = "sleep_reminder_channel_id"
         val channelName = "Sleep Reminder Notifications"
-        val channelDescription = "Notifies the user to go to sleep based on the selected time"
 
         // Создание канала уведомления для API 26+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val notificationChannel =
-                NotificationChannel(channelId, channelName, importance).apply {
-                    description = channelDescription
-                }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId, channelName, NotificationManager.IMPORTANCE_HIGH
+            )
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
-        val notificationIntent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Создание уведомления
+        // Создание и отправка уведомления
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Время спать")
-            .setContentText("Пора ложиться спать, чтобы выспаться!")
+            .setContentTitle("Напоминание о сне")
+            .setContentText("Пора ложиться спать! Установленное время: $alarmTime")
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(0, notification)
+        NotificationManagerCompat.from(context).notify(0, notification)
     }
 }
 

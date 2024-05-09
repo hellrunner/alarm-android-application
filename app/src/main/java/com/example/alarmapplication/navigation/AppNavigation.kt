@@ -68,11 +68,9 @@ fun AppNavigation(alarmsViewModel: AlarmsViewModel) {
             composable(route = Screens.AlarmScreen.name) {
                 AlarmScreen(navController, alarmsViewModel)
             }
-
             composable(route = Screens.MusicScreen.name) {
                 MusicScreen()
             }
-
             composable(route = Screens.ArticlesScreen.name) {
                 ArticlesScreen()
             }

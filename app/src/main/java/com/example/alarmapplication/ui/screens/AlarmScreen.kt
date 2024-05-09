@@ -1,96 +1,63 @@
 package com.example.alarmapplication.ui.screens
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.app.TimePickerDialog
 import android.os.Build
-import android.widget.Toast
+import android.widget.TimePicker
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.alarmapplication.AlarmActivity
-import com.example.alarmapplication.MainActivity
 import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
-import com.example.alarmapplication.alarm_View_Models.DaysOfWeekViewModel
 import com.example.alarmapplication.model.Alarm
-import com.example.alarmapplication.navigation.Screens
 import com.example.alarmapplication.ui.components.AlarmItem
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.S)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmScreen(
-    navControllerFromAppNavigation: NavHostController = rememberNavController(),
-    alarmsViewModel: AlarmsViewModel,
-    daysOfWeekViewModal: DaysOfWeekViewModel = viewModel(),
+    navController: NavHostController,
+    alarmsViewModel: AlarmsViewModel
 ) {
-
-
-    var showTimePicker by remember { mutableStateOf(false) } //Показать тайм пикер
-
-    val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
-    val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-
-    val state = rememberTimePickerState()
-    val snackState = remember { SnackbarHostState() }
-
-    val snackScope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    var cal: Calendar
-
-    val alarms = remember { MutableStateFlow(listOf<Alarm>()) }
-    val noteList by remember { alarms }.collectAsState()
+    val alarms by alarmsViewModel.alarms.collectAsState()
+    var showDaysDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var editingAlarm by remember { mutableStateOf<Alarm?>(null) }
+    var selectedDays = remember { mutableSetOf<Int>() }
+    var selectedHour by remember { mutableStateOf(0) }
+    var selectedMinute by remember { mutableStateOf(0) }
 
     LazyColumn(
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top
     ) {
-        if (alarmsViewModel.getExistAlarms().isNotEmpty() and alarmsViewModel.flagOnAlarmScreen) {
-            val initializerArrayList: ArrayList<Alarm> = alarmsViewModel.getExistAlarms()
-            val bufferArray: ArrayList<Alarm> = initializerArrayList
-            alarms.value = bufferArray
-        }
-        items(alarms.value) { alarm ->
-            AlarmItem(alarm = alarm) //Создаём карточку будильника.
-            // Тут много раз вызывается функция AlarmItem
+        items(alarms.sortedByDescending { it.index }) { alarm ->
+            AlarmItem(
+                alarm = alarm,
+                onEdit = {
+                    editingAlarm = alarm
+                    selectedDays.clear()
+                    selectedDays.addAll(getDaysSetFromString(alarm.days))
+                    selectedHour = alarm.time.substringBefore(":").toInt()
+                    selectedMinute = alarm.time.substringAfter(":").toInt()
+                    showDaysDialog = true
+                },
+                onRemove = {
+                    alarmsViewModel.removeAlarm(alarm)
+                }
+            )
         }
     }
 
@@ -98,138 +65,142 @@ fun AlarmScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp),
-        Alignment.BottomCenter
+        contentAlignment = Alignment.BottomCenter
     ) {
         FloatingActionButton(
-            onClick = { showTimePicker = true },
+            onClick = {
+                editingAlarm = null
+                selectedDays.clear()
+                selectedHour = 0
+                selectedMinute = 0
+                showDaysDialog = true
+            },
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 1.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add by")
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Добавить будильник")
         }
+    }
+
+    if (showDaysDialog) {
+        val daysOfWeek = listOf(
+            Calendar.MONDAY to "Пн",
+            Calendar.TUESDAY to "Вт",
+            Calendar.WEDNESDAY to "Ср",
+            Calendar.THURSDAY to "Чт",
+            Calendar.FRIDAY to "Пт",
+            Calendar.SATURDAY to "Сб",
+            Calendar.SUNDAY to "Вс"
+        )
+
+        AlertDialog(
+            onDismissRequest = { showDaysDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDaysDialog = false
+                    showTimePicker = true
+                }) { Text("Следующий шаг") }
+            },
+            dismissButton = { TextButton(onClick = { showDaysDialog = false }) { Text("Отмена") } },
+            title = { Text("Выберите дни недели", textAlign = TextAlign.Center) },
+            text = {
+                Column {
+                    daysOfWeek.forEach { (day, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = selectedDays.contains(day),
+                                    onValueChange = {
+                                        if (it) selectedDays.add(day)
+                                        else selectedDays.remove(day)
+                                    }
+                                ),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(label)
+                            Checkbox(
+                                checked = selectedDays.contains(day),
+                                onCheckedChange = null
+                            )
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
     }
 
     if (showTimePicker) {
-        TimePickerDialog(
-            onCancel = { showTimePicker = false },
-            onConfirm = {
-                cal = Calendar.getInstance()
-                cal.set(Calendar.HOUR_OF_DAY, state.hour)
-                cal.set(Calendar.MINUTE, state.minute)
-                cal.isLenient = false
-                snackScope.launch {
-                    snackState.showSnackbar("Entered time: ${formatter.format(cal.time)}")
+        val timePickerDialog = TimePickerDialog(
+            context,
+            { _: TimePicker, hour: Int, minute: Int ->
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hour)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                    // Убедитесь, что установленное время позже текущего момента
+                    if (before(Calendar.getInstance())) {
+                        add(Calendar.DAY_OF_YEAR, 1)
+                    }
                 }
 
-                if (canScheduleExactAlarms(context)) {
-                    val alarmManager =
-                        context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val formattedTime = String.format("%02d:%02d", hour, minute)
+                val daysString = selectedDays.joinToString(", ") { day ->
+                    when (day) {
+                        Calendar.MONDAY -> "Пн"
+                        Calendar.TUESDAY -> "Вт"
+                        Calendar.WEDNESDAY -> "Ср"
+                        Calendar.THURSDAY -> "Чт"
+                        Calendar.FRIDAY -> "Пт"
+                        Calendar.SATURDAY -> "Сб"
+                        Calendar.SUNDAY -> "Вс"
+                        else -> ""
+                    }
+                }
 
-                    /*alarmManager.setInexactRepeating(
-                        AlarmManager.RTC_WAKEUP,
-                        cal.timeInMillis,
-                        AlarmManager.INTERVAL_DAY,
-                        getAlarmActionPending(context)
-                    )*/
-
-                    val alarmClockInfo: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(
-                        cal.timeInMillis,
-                        getAlarmPendingIntent(context)
+                val newAlarm = editingAlarm?.copy(time = formattedTime, days = daysString)
+                    ?: Alarm(
+                        time = formattedTime,
+                        days = daysString,
+                        stateOnOff = true,
+                        existAlarm = true,
+                        index = alarmsViewModel.getNextAlarmIndex()
                     )
-                    alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPending(context))
 
-                    val tempNewList = ArrayList(noteList)
-
-                    val chosenDay =
-                        if (daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms())[0] != "Not value")
-                        {
-                            getChosenDays(daysOfWeekViewModal.getDays(daysOfWeekViewModal.getCountOfAlarms()))
-                        } else {
-                            "Ежедневно"
-                        }
-
-                    val alarm =
-                        Alarm(
-                            simpleDateFormat.format(cal.time),
-                            chosenDay,
-                            stateOnOff = true,//При создании будильника он будет включённым
-                            existAlarm = false, //Его пока ещё нет
-                            index = alarmsViewModel.indexOfAlarm
-                        )
-
-                    tempNewList.add(alarm)
-                    alarms.value = tempNewList
-
-                    daysOfWeekViewModal.setCountOfAlarms()
-                    alarmsViewModel.setAlarms(alarm)
-                    alarmsViewModel.plusToIndexOfAlarm()
+                // Сохранение или обновление будильника
+                if (editingAlarm == null) {
+                    alarmsViewModel.addAlarm(newAlarm)
+                } else {
+                    alarmsViewModel.editAlarm(newAlarm)
                 }
+
+                // Установка будильника
+                alarmsViewModel.setAlarm(
+                    context = context,
+                    alarmTimeInMillis = calendar.timeInMillis,
+                    requestCode = newAlarm.index
+                )
+
                 showTimePicker = false
-                makeToast(context, simpleDateFormat.format(cal.time))
+            },
+            selectedHour, selectedMinute, true
+        )
+        timePickerDialog.show()
+    }
+}
 
-            })
-        {
-            TimePicker(state = state)
+fun getDaysSetFromString(daysString: String): Set<Int> {
+    return daysString.split(", ").mapNotNull {
+        when (it) {
+            "Пн" -> Calendar.MONDAY
+            "Вт" -> Calendar.TUESDAY
+            "Ср" -> Calendar.WEDNESDAY
+            "Чт" -> Calendar.THURSDAY
+            "Пт" -> Calendar.FRIDAY
+            "Сб" -> Calendar.SATURDAY
+            "Вс" -> Calendar.SUNDAY
+            else -> null
         }
-
-    }
-
-    navControllerFromAppNavigation.addOnDestinationChangedListener { _, destination, _ ->
-        if ((destination.route == Screens.MusicScreen.name) or (destination.route == Screens.ArticlesScreen.name)) {
-            if (alarmsViewModel.flagOnAlarmScreen) {
-                alarmsViewModel.flagOnAlarmScreen = false
-            }
-        } else if (destination.route == Screens.AlarmScreen.name) {
-            alarmsViewModel.flagOnAlarmScreen = true
-        }
-
-    }
-
-}
-
-private fun getAlarmPendingIntent(context: Context): PendingIntent {
-    val intent = Intent(context, MainActivity::class.java)
-    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-    return PendingIntent.getActivity(
-        context, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-}
-
-private fun getAlarmActionPending(context: Context): PendingIntent {
-    val intent = Intent(context, AlarmActivity::class.java)
-    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-    return PendingIntent.getActivity(
-        context, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-}
-
-@RequiresApi(Build.VERSION_CODES.S)
-fun canScheduleExactAlarms(context: Context): Boolean {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-    return alarmManager?.canScheduleExactAlarms() ?: false
-}
-
-fun makeToast(context: Context, time: String) {
-    Toast.makeText(
-        context,
-        "Будильник установлен на $time",
-        Toast.LENGTH_SHORT
-    ).show()
-}
-
-fun getChosenDays(numOfArray: ArrayList<String>): String {
-    if (numOfArray.isEmpty()){
-        return "No days"
-    }
-    var days = ""
-    for (i in 0..<numOfArray.size) {
-        days +=
-            if (i == numOfArray.size - 1) {
-                numOfArray[i]
-            } else {
-                numOfArray[i] + " "
-            }
-    }
-    return days
+    }.toSet()
 }
