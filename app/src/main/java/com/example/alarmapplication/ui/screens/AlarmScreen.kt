@@ -40,9 +40,7 @@ fun AlarmScreen(
     var selectedHour by remember { mutableStateOf(0) }
     var selectedMinute by remember { mutableStateOf(0) }
 
-    LazyColumn(
-        verticalArrangement = Arrangement.Top
-    ) {
+    LazyColumn(verticalArrangement = Arrangement.Top) {
         items(alarms.sortedByDescending { it.index }) { alarm ->
             AlarmItem(
                 alarm = alarm,
@@ -55,7 +53,10 @@ fun AlarmScreen(
                     showDaysDialog = true
                 },
                 onRemove = {
-                    alarmsViewModel.removeAlarm(alarm)
+                    alarmsViewModel.removeAlarm(context, alarm)
+                },
+                onToggle = { isEnabled ->
+                    alarmsViewModel.toggleAlarm(context, alarm, isEnabled)
                 }
             )
         }
@@ -81,6 +82,7 @@ fun AlarmScreen(
         }
     }
 
+    // Диалог выбора дней недели
     if (showDaysDialog) {
         val daysOfWeek = listOf(
             Calendar.MONDAY to "Пн",
@@ -130,6 +132,7 @@ fun AlarmScreen(
         )
     }
 
+    // Диалог выбора времени
     if (showTimePicker) {
         val timePickerDialog = TimePickerDialog(
             context,
@@ -139,7 +142,6 @@ fun AlarmScreen(
                     set(Calendar.MINUTE, minute)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
-                    // Убедитесь, что установленное время позже текущего момента
                     if (before(Calendar.getInstance())) {
                         add(Calendar.DAY_OF_YEAR, 1)
                     }
@@ -168,19 +170,15 @@ fun AlarmScreen(
                         index = alarmsViewModel.getNextAlarmIndex()
                     )
 
-                // Сохранение или обновление будильника
                 if (editingAlarm == null) {
                     alarmsViewModel.addAlarm(newAlarm)
                 } else {
                     alarmsViewModel.editAlarm(newAlarm)
                 }
 
-                // Установка будильника
-                alarmsViewModel.setAlarm(
-                    context = context,
-                    alarmTimeInMillis = calendar.timeInMillis,
-                    requestCode = newAlarm.index
-                )
+                if (newAlarm.stateOnOff) {
+                    alarmsViewModel.setAlarm(context, newAlarm)
+                }
 
                 showTimePicker = false
             },

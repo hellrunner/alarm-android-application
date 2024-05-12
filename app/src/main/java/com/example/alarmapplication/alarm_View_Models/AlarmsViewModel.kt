@@ -52,22 +52,23 @@ class AlarmsViewModel : ViewModel() {
         }
     }
 
-    fun setAlarm(context: Context, alarmTimeInMillis: Long, requestCode: Int) {
+    fun setAlarm(context: Context, alarm: Alarm) {
+        if (!alarm.stateOnOff) return
+
+        // Подготовка намерения для будильника
         val alarmIntent = Intent(context, AlarmActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            requestCode,
+            alarm.index,
             alarmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Логгирование для диагностики
-        Log.d("Alarm", "Setting alarm for: $alarmTimeInMillis with request code: $requestCode")
-
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val alarmTimeInMillis = convertTimeToMillis(alarm.time)
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 alarmTimeInMillis,
@@ -78,17 +79,23 @@ class AlarmsViewModel : ViewModel() {
         }
     }
 
+
+
     fun addAlarm(alarm: Alarm) {
         _alarms.value = listOf(alarm) + _alarms.value // Добавить новые будильники в начало списка
         indexOfAlarm++
         saveAlarmsToPreferences()
     }
 
+    fun removeAlarm(context: Context, alarm: Alarm) {
+        // Отменяем будильник перед удалением
+        cancelAlarm(context, alarm)
 
-    fun removeAlarm(alarm: Alarm) {
         _alarms.value = _alarms.value.filter { it.index != alarm.index }
         saveAlarmsToPreferences()
     }
+
+
 
     fun editAlarm(updatedAlarm: Alarm) {
         _alarms.value =
@@ -145,26 +152,46 @@ class AlarmsViewModel : ViewModel() {
                     add(Calendar.WEEK_OF_YEAR, 1)
                 }
             }
-            setAlarm(
-                context,
-                calendar.timeInMillis,
-                alarm.index * 10 + day
-            ) // Уникальный requestCode для каждого дня
+
+            // Создайте новый Alarm объект с теми же данными
+            val newAlarm = alarm.copy()
+
+            // Используйте новый метод `setAlarm`, который принимает объект `Alarm`
+            setAlarm(context, newAlarm)
         }
     }
 
-    fun cancelAlarm(context: Context, alarm: Alarm) {
-        val intent = Intent(context, AlarmActivity::class.java)
-        val days = alarm.days.split(", ").mapNotNull { dayStringToCalendarDay(it) }
-        val pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
-        days.forEach { day ->
-            val requestCode = alarm.index * 10 + day
-            val pendingIntent =
-                PendingIntent.getActivity(context, requestCode, intent, pendingIntentFlags)
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.cancel(pendingIntent)
+    fun cancelAlarm(context: Context, alarm: Alarm) {
+        // Отменить запланированный будильник
+        val alarmIntent = Intent(context, AlarmActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            alarm.index,
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent)
+    }
+
+    private fun convertTimeToMillis(time: String): Long {
+        val parts = time.split(":")
+        val hour = parts[0].toIntOrNull() ?: 0
+        val minute = parts[1].toIntOrNull() ?: 0
+
+        val now = Calendar.getInstance()
+        now.set(Calendar.HOUR_OF_DAY, hour)
+        now.set(Calendar.MINUTE, minute)
+        now.set(Calendar.SECOND, 0)
+        now.set(Calendar.MILLISECOND, 0)
+
+        // Если время уже прошло сегодня, ставим на следующий день
+        if (now.before(Calendar.getInstance())) {
+            now.add(Calendar.DATE, 1)
         }
+
+        return now.timeInMillis
     }
 
     fun dayStringToCalendarDay(day: String): Int? {

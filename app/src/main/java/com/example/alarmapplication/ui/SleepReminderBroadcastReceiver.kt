@@ -33,7 +33,7 @@ class SleepReminderBroadcastReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Напоминание о сне")
             .setContentText("Пора ложиться спать! Установленное время: $alarmTime")
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
