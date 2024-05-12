@@ -1,4 +1,4 @@
-package com.example.alarmapplication.alarm_View_Models
+package com.example.alarmapplication.viewmodel
 
 import android.app.AlarmManager
 import android.app.PendingIntent

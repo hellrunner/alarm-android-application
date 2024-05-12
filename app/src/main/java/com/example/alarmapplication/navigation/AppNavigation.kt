@@ -20,7 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
+import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.ui.screens.AlarmScreen
 import com.example.alarmapplication.ui.screens.ArticlesScreen
 import com.example.alarmapplication.ui.screens.MusicScreen

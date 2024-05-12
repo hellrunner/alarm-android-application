@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
+import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.ui.components.AlarmItem
 import java.util.*

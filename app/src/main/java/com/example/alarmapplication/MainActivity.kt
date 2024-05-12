@@ -7,8 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
-import com.example.alarmapplication.alarm_View_Models.AlarmsViewModel
-import com.example.alarmapplication.model.Alarm
+import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.navigation.AppNavigation
 
 class MainActivity : ComponentActivity() {
