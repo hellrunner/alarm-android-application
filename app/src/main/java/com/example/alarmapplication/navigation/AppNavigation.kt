@@ -1,5 +1,7 @@
 package com.example.alarmapplication.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,12 +20,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.ui.screens.AlarmScreen
 import com.example.alarmapplication.ui.screens.ArticlesScreen
 import com.example.alarmapplication.ui.screens.MusicScreen
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(alarmsViewModel: AlarmsViewModel) {
     val navController: NavHostController = rememberNavController()
 
     Scaffold(
@@ -50,9 +54,6 @@ fun AppNavigation() {
                                 contentDescription = null
                             )
                         },
-//                        label = {
-//                            Text(text = navItem.label)
-//                        }
                     )
                 }
             }
@@ -65,13 +66,11 @@ fun AppNavigation() {
                 .padding(paddingValues)
         ) {
             composable(route = Screens.AlarmScreen.name) {
-                AlarmScreen()
+                AlarmScreen(navController, alarmsViewModel)
             }
-
             composable(route = Screens.MusicScreen.name) {
                 MusicScreen()
             }
-
             composable(route = Screens.ArticlesScreen.name) {
                 ArticlesScreen()
             }
