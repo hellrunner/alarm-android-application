@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.navigation.AppNavigation
+import com.example.alarmapplication.ui.theme.AlarmApplicationTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -27,7 +28,9 @@ class MainActivity : ComponentActivity() {
 
         // Отображаем навигацию
         setContent {
-            AppNavigation(alarmsViewModel)
+            AlarmApplicationTheme {
+                AppNavigation(alarmsViewModel)
+            }
         }
     }
 

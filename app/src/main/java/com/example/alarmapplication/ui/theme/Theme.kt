@@ -16,16 +16,27 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    background = BackgroundDarkColor,
+    surface = SurfaceDarkColor,
+    onPrimary = OnPrimaryDarkColor,
+    onSecondary = OnSecondaryDarkColor,
+    onBackground = OnBackgroundDarkColor,
+    onSurface = OnSurfaceDarkColor
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    background = BackgroundLightColor,
+    surface = SurfaceLightColor,
+    onPrimary = OnPrimaryLightColor,
+    onSecondary = OnSecondaryLightColor,
+    onBackground = OnBackgroundLightColor,
+    onSurface = OnSurfaceLightColor
 )
+
 
 @Composable
 fun AlarmApplicationTheme(
