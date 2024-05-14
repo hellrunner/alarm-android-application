@@ -14,12 +14,12 @@ import com.example.alarmapplication.R
 
 class SleepReminderBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmTime = intent.getStringExtra("alarmTime") ?: "Неизвестно"
+        val alarmTime = intent.getStringExtra("alarmTime") ?: context.getString(R.string.unknown)
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val channelId = "sleep_reminder_channel_id"
-        val channelName = "Sleep Reminder Notifications"
+        val channelName = context.getString(R.string.sleep_reminder_channel_name)
 
         // Создание канала уведомления для API 26+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -31,8 +31,8 @@ class SleepReminderBroadcastReceiver : BroadcastReceiver() {
 
         // Создание и отправка уведомления
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Напоминание о сне")
-            .setContentText("Пора ложиться спать! Установленное время: $alarmTime")
+            .setContentTitle(context.getString(R.string.sleep_reminder_title))
+            .setContentText(context.getString(R.string.sleep_reminder_text, alarmTime))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -41,4 +41,3 @@ class SleepReminderBroadcastReceiver : BroadcastReceiver() {
         NotificationManagerCompat.from(context).notify(0, notification)
     }
 }
-

@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,7 +79,7 @@ class AlarmActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Флаг какой страны?",
+                text = stringResource(id = R.string.flag_question),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,7 +87,7 @@ class AlarmActivity : ComponentActivity() {
             )
             Image(
                 painter = painterResource(id = currentFlag.imageResId),
-                contentDescription = "Флаг ${currentFlag.countryName}",
+                contentDescription = stringResource(id = R.string.flag_description, currentFlag.countryName),
                 modifier = Modifier
                     .size(200.dp)
                     .align(Alignment.CenterHorizontally)
@@ -131,7 +132,7 @@ class AlarmActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Реши арифметическую задачу",
+                text = stringResource(id = R.string.solve_arithmetic),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,18 +164,19 @@ class AlarmActivity : ComponentActivity() {
         }
     }
 
+    @Composable
     fun getFlags(): List<Flag> {
         return listOf(
-            Flag(R.drawable.flag_usa, "США"),
-            Flag(R.drawable.flag_canada, "Канада"),
-            Flag(R.drawable.flag_germany, "Германия"),
-            Flag(R.drawable.flag_france, "Франция"),
-            Flag(R.drawable.flag_italy, "Италия"),
-            Flag(R.drawable.flag_japan, "Япония"),
-            Flag(R.drawable.flag_brazil, "Бразилия"),
-            Flag(R.drawable.flag_india, "Индия"),
-            Flag(R.drawable.flag_australia, "Австралия"),
-            Flag(R.drawable.flag_russia, "Россия")
+            Flag(R.drawable.flag_usa, stringResource(id = R.string.country_usa)),
+            Flag(R.drawable.flag_canada, stringResource(id = R.string.country_canada)),
+            Flag(R.drawable.flag_germany, stringResource(id = R.string.country_germany)),
+            Flag(R.drawable.flag_france, stringResource(id = R.string.country_france)),
+            Flag(R.drawable.flag_italy, stringResource(id = R.string.country_italy)),
+            Flag(R.drawable.flag_japan, stringResource(id = R.string.country_japan)),
+            Flag(R.drawable.flag_brazil, stringResource(id = R.string.country_brazil)),
+            Flag(R.drawable.flag_india, stringResource(id = R.string.country_india)),
+            Flag(R.drawable.flag_australia, stringResource(id = R.string.country_australia)),
+            Flag(R.drawable.flag_russia, stringResource(id = R.string.country_russia))
         )
     }
 

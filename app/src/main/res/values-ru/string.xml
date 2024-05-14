@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Умный будильник</string>
+    <string name="delete_alarm">Удалить будильник</string>
+    <string name="next">Следующий шаг</string>
+    <string name="previous">Назад</string>
+    <string name="add_alarm">Добавить будильник</string>
+    <string name="cancel">Отмена</string>
+    <string name="choose_days">Выберите дни недели</string>
+    <string name="ok">ОК</string>
+    <string name="time">Время</string>
+    <string name="update">Обновить</string>
+    <string name="delete">Удалить</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet</string>
+    <!-- Строки для экрана с музыкой -->
+    <string name="select_melody">Выберите мелодию</string>
+    <string name="selected_time">Выбранное время: %1$s</string>
+    <string name="set_wake_up_time">Установить время пробуждения</string>
+    <string name="sleep_at">Нужно лечь в:</string>
+    <string name="music_icon">Иконка музыки</string>
+    <string name="notification_set_for">Уведомление установлено на %1$s</string>
+    <!-- Заголовки и содержание статей -->
+    <string name="article_title_1">Регулярность важна</string>
+    <string name="article_content_1">Старайтесь ложиться спать и просыпаться в одно и то же время каждый день. Это помогает установить ваш биологический час и улучшить качество сна.</string>
+    <string name="article_title_2">Температура имеет значение</string>
+    <string name="article_content_2">Идеальная температура для сна - около 18°C (64°F). Чрезмерно теплая или холодная комната может нарушить ваш сон.</string>
+    <string name="article_title_3">Технологии могут мешать</string>
+    <string name="article_content_3">Синий свет от экранов телефонов, планшетов и компьютеров может подавлять выработку мелатонина, гормона, который помогает вам засыпать.</string>
+    <string name="article_title_4">Дневные сны должны быть короткими</string>
+    <string name="article_content_4">Длинные дневные сны могут нарушить ночной сон. Если вам нужен дневной сон, лучше всего ограничить его 20–30 минутами.</string>
+    <string name="article_title_5">Физическая активность способствует лучшему сну</string>
+    <string name="article_content_5">Регулярная физическая активность способствует улучшению сна. Старайтесь регулярно выполнять физическую активность.</string>
+    <string name="article_title_6">Ограничение потребления кофеина и алкоголя</string>
+    <string name="article_content_6">Избегайте кофеина и алкоголя за несколько часов до сна, так как они могут нарушить ваш сон.</string>
+    <!-- Строки для напоминания о сне -->
+    <string name="sleep_reminder_title">Напоминание о сне</string>
+    <string name="sleep_reminder_text">Пора ложиться спать! Установленное время: %1$s</string>
+    <string name="sleep_reminder_channel_name">Уведомления о напоминании о сне</string>
+    <string name="unknown">Неизвестно</string>
+    <!-- Строки для игр -->
+    <string name="flag_question">Флаг какой страны?</string>
+    <string name="solve_arithmetic">Реши арифметическую задачу</string>
+    <string name="flag_description">Флаг %1$s</string>
+    <string name="country_usa">США</string>
+    <string name="country_canada">Канада</string>
+    <string name="country_germany">Германия</string>
+    <string name="country_france">Франция</string>
+    <string name="country_italy">Италия</string>
+    <string name="country_japan">Япония</string>
+    <string name="country_brazil">Бразилия</string>
+    <string name="country_india">Индия</string>
+    <string name="country_australia">Австралия</string>
+    <string name="country_russia">Россия</string>
+    <string-array name="day_names">
+        <item>Вс</item>
+        <item>Пн</item>
+        <item>Вт</item>
+        <item>Ср</item>
+        <item>Чт</item>
+        <item>Пт</item>
+        <item>Сб</item>
+    </string-array>
+</resources>

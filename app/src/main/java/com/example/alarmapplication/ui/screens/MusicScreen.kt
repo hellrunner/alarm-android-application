@@ -2,11 +2,13 @@ package com.example.alarmapplication.ui.screens
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.provider.Settings
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -37,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,8 +84,8 @@ fun MusicScreen() {
             }
             mediaPlayers.clear()
         }
-
     }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -90,7 +93,7 @@ fun MusicScreen() {
         Text(
             fontWeight = FontWeight.Bold,
             fontSize = 28.sp,
-            text = "Выберете мелодию"
+            text = stringResource(id = R.string.select_melody)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -125,7 +128,7 @@ fun MusicScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp),
-                    text = "Выбранное время:\n${selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                    text = stringResource(id = R.string.selected_time, selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -135,14 +138,14 @@ fun MusicScreen() {
                     modifier = Modifier.padding(5.dp),
                     onClick = { showTimePicker = true },
                 ) {
-                    Text(text = "Установить время пробуждения")
+                    Text(text = stringResource(id = R.string.set_wake_up_time))
                 }
             }
         }
         if (showTimePicker) {
-            val pickerDialog = android.app.TimePickerDialog(
+            val pickerDialog = TimePickerDialog(
                 context,
-                { _, hour, minute ->
+                { _: TimePicker, hour: Int, minute: Int ->
                     val newWakeUpTime = LocalTime.of(hour, minute)
                     selectedTime = newWakeUpTime
                     sleepTimes = calculateSleepTimes(newWakeUpTime)
@@ -160,12 +163,12 @@ fun MusicScreen() {
         }
         Spacer(modifier = Modifier.height(40.dp))
         Text(
-            text = "Нужно лечь в:",
+            text = stringResource(id = R.string.sleep_at),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-        SleepTimeCards(sleepTimes = sleepTimes, context = context)
+        SleepTimeCards(sleepTimes = sleepTimes)
     }
 }
 
@@ -209,11 +212,10 @@ fun MusicButton(
                     else -> R.drawable.music_storm
                 }
             ),
-            contentDescription = "Music Icon"
+            contentDescription = stringResource(id = R.string.music_icon)
         )
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun calculateSleepTimes(wakeUpTime: LocalTime): List<LocalTime> {
@@ -221,10 +223,10 @@ fun calculateSleepTimes(wakeUpTime: LocalTime): List<LocalTime> {
     return List(6) { wakeUpTime.minusMinutes((it + 1) * cycleDuration.toMinutes()) }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SleepTimeCards(sleepTimes: List<LocalTime>, context: Context) {
+fun SleepTimeCards(sleepTimes: List<LocalTime>) {
+    val context = LocalContext.current
     val numberOfRows = 2
     val numberOfItemsPerRow = sleepTimes.size / numberOfRows
 
@@ -238,28 +240,24 @@ fun SleepTimeCards(sleepTimes: List<LocalTime>, context: Context) {
             ) {
                 for (j in 0 until numberOfItemsPerRow) {
                     val sleepTime = sleepTimes.getOrNull(i * numberOfItemsPerRow + j) ?: break
-                    TimeCard(time = sleepTime, context = context)
+                    TimeCard(time = sleepTime)
                 }
             }
         }
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TimeCard(time: LocalTime, context: Context) {
+fun TimeCard(time: LocalTime) {
+    val context = LocalContext.current
+    val notificationText = stringResource(R.string.notification_set_for, time.format(DateTimeFormatter.ofPattern("HH:mm")))
+
     Card(
         modifier = Modifier
             .padding(4.dp)
             .clickable {
-                Toast
-                    .makeText(
-                        context,
-                        "Уведомление установленно на ${time.format(DateTimeFormatter.ofPattern("HH:mm"))}",
-                        Toast.LENGTH_SHORT
-                    )
-                    .show()
+                Toast.makeText(context, notificationText, Toast.LENGTH_SHORT).show()
                 setSleepReminder(time, context)
             },
     ) {
@@ -271,7 +269,6 @@ fun TimeCard(time: LocalTime, context: Context) {
         )
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun setSleepReminder(time: LocalTime, context: Context) {
@@ -316,5 +313,3 @@ fun setSleepReminder(time: LocalTime, context: Context) {
         pendingIntent
     )
 }
-
-

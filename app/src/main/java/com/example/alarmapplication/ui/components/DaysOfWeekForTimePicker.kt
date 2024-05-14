@@ -8,8 +8,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.alarmapplication.R
 import java.util.*
 
 @Composable
@@ -36,15 +39,7 @@ fun DayOfWeekTimePickerDialog(
     )
 
     // Отображение дней недели
-    val daysOfWeek = listOf(
-        Calendar.MONDAY to "Пн",
-        Calendar.TUESDAY to "Вт",
-        Calendar.WEDNESDAY to "Ср",
-        Calendar.THURSDAY to "Чт",
-        Calendar.FRIDAY to "Пт",
-        Calendar.SATURDAY to "Сб",
-        Calendar.SUNDAY to "Вс"
-    )
+    val dayNames = stringArrayResource(id = R.array.day_names)
 
     // Диалог для выбора дней
     AlertDialog(
@@ -53,13 +48,14 @@ fun DayOfWeekTimePickerDialog(
             TextButton(onClick = {
                 timePickerDialog.show()
                 onConfirm(hour, minute, selectedDays.value)
-            }) { Text("ОК") }
+            }) { Text(stringResource(id = R.string.ok)) }
         },
-        dismissButton = { TextButton(onClick = onCancel) { Text("Отмена") } },
-        title = { Text("Выберите дни недели", textAlign = TextAlign.Center) },
+        dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(id = R.string.cancel)) } },
+        title = { Text(stringResource(id = R.string.choose_days), textAlign = TextAlign.Center) },
         text = {
             Column {
-                daysOfWeek.forEach { (day, label) ->
+                dayNames.forEachIndexed { index, label ->
+                    val day = index + 1
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -84,5 +80,3 @@ fun DayOfWeekTimePickerDialog(
         modifier = Modifier.padding(16.dp)
     )
 }
-
-

@@ -10,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import com.example.alarmapplication.R
 import com.example.alarmapplication.model.Alarm
 
 @Composable
@@ -27,7 +29,7 @@ fun AlarmSettingsScreen(
         TextField(
             value = time,
             onValueChange = { time = it },
-            label = { Text("Время") }
+            label = { Text(stringResource(id = R.string.time)) }
         )
 
         // Здесь используйте UI для выбора дней недели
@@ -38,13 +40,13 @@ fun AlarmSettingsScreen(
                 val updatedAlarm = alarm.copy(time = time, days = days)
                 onUpdateAlarm(updatedAlarm)
             }) {
-                Text("Обновить")
+                Text(stringResource(id = R.string.update))
             }
             Button(onClick = { onDeleteAlarm(alarm) }) {
-                Text("Удалить")
+                Text(stringResource(id = R.string.delete))
             }
             Button(onClick = onCancel) {
-                Text("Отмена")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     }
