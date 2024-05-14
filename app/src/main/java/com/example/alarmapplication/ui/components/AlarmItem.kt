@@ -1,5 +1,6 @@
 package com.example.alarmapplication.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,16 +20,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.alarmapplication.R
 import com.example.alarmapplication.model.Alarm
 
 @Composable
 fun AlarmItem(alarm: Alarm, onRemove: () -> Unit, onEdit: () -> Unit, onToggle: (Boolean) -> Unit) {
     val checkedState = remember { mutableStateOf(alarm.stateOnOff) }
-    val daysText = remember(alarm.days) { convertDaysToText(alarm.days) }
+    val context = LocalContext.current
+    val daysText = remember(alarm.days) { convertDaysToText(context, alarm.days) }
 
     Surface(
         modifier = Modifier
@@ -67,14 +72,17 @@ fun AlarmItem(alarm: Alarm, onRemove: () -> Unit, onEdit: () -> Unit, onToggle: 
             )
 
             IconButton(onClick = onRemove) {
-                Icon(imageVector = Icons.Filled.Delete, contentDescription = "Удалить будильник")
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.delete_alarm)
+                )
             }
         }
     }
 }
 
-fun convertDaysToText(days: String): String {
+fun convertDaysToText(context: Context, days: String): String {
     val dayIndices = days.split(",").mapNotNull { it.trim().toIntOrNull() }
-    val dayNames = listOf("Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб")
-    return dayIndices.sorted().joinToString(", ") { dayNames[it % 7] ?: "" }
+    val dayNames = context.resources.getStringArray(R.array.day_names)
+    return dayIndices.sorted().joinToString(", ") { dayNames[it % 7] }
 }

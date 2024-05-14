@@ -2,6 +2,7 @@ package com.example.alarmapplication.ui.screens
 
 import android.annotation.SuppressLint
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Build
 import android.widget.TimePicker
 import androidx.annotation.RequiresApi
@@ -16,9 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.alarmapplication.R
 import com.example.alarmapplication.viewmodel.AlarmsViewModel
 import com.example.alarmapplication.model.Alarm
 import com.example.alarmapplication.ui.components.AlarmItem
@@ -37,8 +41,8 @@ fun AlarmScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<Alarm?>(null) }
     var selectedDays = remember { mutableSetOf<Int>() }
-    var selectedHour by remember { mutableStateOf(0) }
-    var selectedMinute by remember { mutableStateOf(0) }
+    var selectedHour by remember { mutableIntStateOf(0) }
+    var selectedMinute by remember { mutableIntStateOf(0) }
 
     LazyColumn(verticalArrangement = Arrangement.Top) {
         items(alarms.sortedByDescending { it.index }) { alarm ->
@@ -47,7 +51,7 @@ fun AlarmScreen(
                 onEdit = {
                     editingAlarm = alarm
                     selectedDays.clear()
-                    selectedDays.addAll(getDaysSetFromString(alarm.days))
+                    selectedDays.addAll(getDaysSetFromString(context, alarm.days))
                     selectedHour = alarm.time.substringBefore(":").toInt()
                     selectedMinute = alarm.time.substringAfter(":").toInt()
                     showDaysDialog = true
@@ -78,21 +82,16 @@ fun AlarmScreen(
             },
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 1.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Добавить будильник")
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = stringResource(R.string.add_alarm)
+            )
         }
     }
 
     // Диалог выбора дней недели
     if (showDaysDialog) {
-        val daysOfWeek = listOf(
-            Calendar.MONDAY to "Пн",
-            Calendar.TUESDAY to "Вт",
-            Calendar.WEDNESDAY to "Ср",
-            Calendar.THURSDAY to "Чт",
-            Calendar.FRIDAY to "Пт",
-            Calendar.SATURDAY to "Сб",
-            Calendar.SUNDAY to "Вс"
-        )
+        val daysOfWeek = stringArrayResource(id = R.array.day_names)
 
         AlertDialog(
             onDismissRequest = { showDaysDialog = false },
@@ -100,28 +99,32 @@ fun AlarmScreen(
                 TextButton(onClick = {
                     showDaysDialog = false
                     showTimePicker = true
-                }) { Text("Следующий шаг") }
+                }) { Text(stringResource(R.string.next)) }
             },
-            dismissButton = { TextButton(onClick = { showDaysDialog = false }) { Text("Отмена") } },
-            title = { Text("Выберите дни недели", textAlign = TextAlign.Center) },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDaysDialog = false
+                }) { Text(stringResource(R.string.cancel)) }
+            },
+            title = { Text(stringResource(R.string.choose_days), textAlign = TextAlign.Center) },
             text = {
                 Column {
-                    daysOfWeek.forEach { (day, label) ->
+                    daysOfWeek.forEachIndexed { index, label ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .toggleable(
-                                    value = selectedDays.contains(day),
+                                    value = selectedDays.contains(index + 1),
                                     onValueChange = {
-                                        if (it) selectedDays.add(day)
-                                        else selectedDays.remove(day)
+                                        if (it) selectedDays.add(index + 1)
+                                        else selectedDays.remove(index + 1)
                                     }
                                 ),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(label)
                             Checkbox(
-                                checked = selectedDays.contains(day),
+                                checked = selectedDays.contains(index + 1),
                                 onCheckedChange = null
                             )
                         }
@@ -148,18 +151,8 @@ fun AlarmScreen(
                 }
 
                 val formattedTime = String.format("%02d:%02d", hour, minute)
-                val daysString = selectedDays.joinToString(", ") { day ->
-                    when (day) {
-                        Calendar.MONDAY -> "Пн"
-                        Calendar.TUESDAY -> "Вт"
-                        Calendar.WEDNESDAY -> "Ср"
-                        Calendar.THURSDAY -> "Чт"
-                        Calendar.FRIDAY -> "Пт"
-                        Calendar.SATURDAY -> "Сб"
-                        Calendar.SUNDAY -> "Вс"
-                        else -> ""
-                    }
-                }
+                val dayNames = context.resources.getStringArray(R.array.day_names)
+                val daysString = selectedDays.joinToString(", ") { dayNames[(it - 1) % 7] }
 
                 val newAlarm = editingAlarm?.copy(time = formattedTime, days = daysString)
                     ?: Alarm(
@@ -188,16 +181,17 @@ fun AlarmScreen(
     }
 }
 
-fun getDaysSetFromString(daysString: String): Set<Int> {
+fun getDaysSetFromString(context: Context, daysString: String): Set<Int> {
+    val dayNames = context.resources.getStringArray(R.array.day_names)
     return daysString.split(", ").mapNotNull {
         when (it) {
-            "Пн" -> Calendar.MONDAY
-            "Вт" -> Calendar.TUESDAY
-            "Ср" -> Calendar.WEDNESDAY
-            "Чт" -> Calendar.THURSDAY
-            "Пт" -> Calendar.FRIDAY
-            "Сб" -> Calendar.SATURDAY
-            "Вс" -> Calendar.SUNDAY
+            dayNames[0] -> Calendar.SUNDAY
+            dayNames[1] -> Calendar.MONDAY
+            dayNames[2] -> Calendar.TUESDAY
+            dayNames[3] -> Calendar.WEDNESDAY
+            dayNames[4] -> Calendar.THURSDAY
+            dayNames[5] -> Calendar.FRIDAY
+            dayNames[6] -> Calendar.SATURDAY
             else -> null
         }
     }.toSet()
