@@ -1,5 +1,6 @@
 package com.example.alarmapplication
 
+import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
@@ -30,27 +31,30 @@ import kotlin.random.Random
 
 class AlarmActivity : ComponentActivity() {
 
-    private var ringtone: Ringtone? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupRingtone()
+        setupMediaPlayer()
 
         setContent {
             AlarmGame()
         }
     }
 
-    private fun setupRingtone() {
-        val alarmUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-        ringtone = RingtoneManager.getRingtone(applicationContext, alarmUri)
-        ringtone?.play()
+    private fun setupMediaPlayer() {
+        // Используем ваш файл из res/raw
+        val alarmUri: Uri = Uri.parse("android.resource://" + packageName + "/" + R.raw.music_alarm_main)
+        mediaPlayer = MediaPlayer.create(this, alarmUri)
+        mediaPlayer?.isLooping = true // Если вы хотите, чтобы звук повторялся
+        mediaPlayer?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        ringtone?.stop()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     @Composable
@@ -97,7 +101,7 @@ class AlarmActivity : ComponentActivity() {
                 Button(
                     onClick = {
                         if (flag.countryName == currentFlag.countryName) {
-                            ringtone?.stop()
+                            mediaPlayer?.stop()
                             finish()
                         }
                     },
@@ -150,7 +154,7 @@ class AlarmActivity : ComponentActivity() {
                 Button(
                     onClick = {
                         if (answer == correctAnswer) {
-                            ringtone?.stop()
+                            mediaPlayer?.stop()
                             finish()
                         }
                     },

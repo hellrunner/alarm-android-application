@@ -31,7 +31,7 @@
     <string name="article_content_6">Avoid caffeine and alcohol several hours before bedtime, as they can disrupt your sleep.</string>
     <!-- Sleep Reminder strings -->
     <string name="sleep_reminder_title">Sleep Reminder</string>
-    <string name="sleep_reminder_text">Time to go to bed! Set time: %1$s</string>
+    <string name="sleep_reminder_text">Time to go to bed!</string>
     <string name="sleep_reminder_channel_name">Sleep Reminder Notifications</string>
     <string name="unknown">Unknown</string>
     <!-- Game strings -->

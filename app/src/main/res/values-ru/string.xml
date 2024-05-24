@@ -33,7 +33,7 @@
     <string name="article_content_6">Избегайте кофеина и алкоголя за несколько часов до сна, так как они могут нарушить ваш сон.</string>
     <!-- Строки для напоминания о сне -->
     <string name="sleep_reminder_title">Напоминание о сне</string>
-    <string name="sleep_reminder_text">Пора ложиться спать! Установленное время: %1$s</string>
+    <string name="sleep_reminder_text">Пора ложиться спать!</string>
     <string name="sleep_reminder_channel_name">Уведомления о напоминании о сне</string>
     <string name="unknown">Неизвестно</string>
     <!-- Строки для игр -->

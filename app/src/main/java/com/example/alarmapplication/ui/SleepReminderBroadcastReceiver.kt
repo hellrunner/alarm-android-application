@@ -14,7 +14,6 @@ import com.example.alarmapplication.R
 
 class SleepReminderBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmTime = intent.getStringExtra("alarmTime") ?: context.getString(R.string.unknown)
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -32,7 +31,7 @@ class SleepReminderBroadcastReceiver : BroadcastReceiver() {
         // Создание и отправка уведомления
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle(context.getString(R.string.sleep_reminder_title))
-            .setContentText(context.getString(R.string.sleep_reminder_text, alarmTime))
+            .setContentText(context.getString(R.string.sleep_reminder_text))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
